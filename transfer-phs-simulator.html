@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Transfer PHS Award Simulator</title>
+<style>
+  :root{
+    --ink:#0c1c2e;
+    --ink-soft:#4a5b6c;
+    --paper:#f7f7f5;
+    --line:#d8dbe0;
+    --field:#ffffff;
+    --navy:#041E42;
+    --navy-deep:#02132b;
+    --gold:#B08D2B;
+    --gold-light:#f4ecd8;
+    --band-hi:#eef1f5;
+    --band-lo:#f7f4e9;
+    --band-3:#f5ede0;
+    --flag:#9a3b2e;
+    --good:#2e6b4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    line-height:1.5;
+    padding:0 0 4rem;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 1.25rem;}
+
+  .school-header{
+    background:var(--navy);
+    color:#fff;
+    padding:1.4rem 1.25rem;
+    margin-bottom:2rem;
+    border-bottom:4px solid var(--gold);
+  }
+  .school-header-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:0.9rem;}
+  .school-header .crest{
+    width:44px;height:44px;border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:1rem;color:var(--gold);
+    font-family:Georgia,serif;flex-shrink:0;
+  }
+  .school-header .school-name{font-size:0.78rem;letter-spacing:0.06em;color:var(--gold);margin-bottom:0.15rem;}
+  .school-header h1{margin:0;font-size:1.4rem;font-weight:600;color:#fff;}
+
+  header.intro{margin-bottom:2rem;}
+
+  section{margin-bottom:2.25rem;}
+  h2{
+    font-size:1.05rem;margin:0 0 0.9rem;font-weight:600;color:var(--navy);
+    border-bottom:2px solid var(--gold);padding-bottom:0.4rem;
+  }
+  .subnote{margin:-0.4rem 0 1rem;color:var(--ink-soft);font-size:0.86rem;max-width:66ch;}
+
+  table.grid{width:100%;border-collapse:collapse;font-size:0.86rem;}
+  table.grid th, table.grid td{padding:0.5rem 0.6rem;border-bottom:1px solid var(--line);text-align:left;}
+  table.grid th{color:var(--ink-soft);font-weight:600;font-size:0.76rem;}
+  table.grid td.num, table.grid th.num{text-align:right;}
+  table.grid tr.tier-transformAA td:first-child, table.grid tr.tier-transformAA td.tiercell{background:var(--band-hi);}
+  table.grid tr.band-hi{background:var(--band-hi);}
+  table.grid tr.band-lo{background:var(--band-lo);}
+  table.grid tr.band-3{background:var(--band-3);}
+  table.grid input{
+    width:78px;border:1px solid var(--line);background:#fff;padding:0.3rem 0.4rem;
+    font:inherit;font-size:0.85rem;border-radius:2px;color:var(--ink);text-align:right;
+  }
+  table.grid input:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  table.grid td.tiername{font-weight:600;font-size:0.82rem;color:var(--ink);}
+  table.grid tfoot td{font-weight:600;border-top:2px solid var(--ink);border-bottom:none;}
+
+  .fallback{
+    border:1px solid var(--gold);background:var(--gold-light);border-radius:3px;
+    padding:0.85rem 1rem;font-size:0.86rem;color:var(--navy);margin-top:1rem;
+  }
+  .fallback strong{color:var(--navy);}
+  .under30-inputs{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:0.7rem;}
+  .under30-inputs .field{display:flex;flex-direction:column;gap:0.25rem;}
+  .under30-inputs label{font-size:0.78rem;color:var(--ink-soft);}
+  .under30-inputs input{
+    width:110px;border:1px solid var(--line);padding:0.3rem 0.5rem;font:inherit;
+    font-size:0.85rem;border-radius:2px;text-align:right;
+  }
+
+  .kpi-block{margin-top:0.5rem;}
+  .kpi-block h3{
+    font-size:0.8rem;font-weight:600;color:var(--navy);margin:0 0 0.7rem;
+    letter-spacing:0.08em;text-transform:uppercase;
+    border-left:4px solid var(--gold);padding-left:0.6rem;
+  }
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;margin-bottom:1.6rem;}
+  .kpi{
+    background:var(--field);border:1px solid var(--line);border-top:3px solid var(--navy);border-radius:4px;
+    padding:0.9rem 1rem;
+  }
+  .kpi .label{font-size:0.68rem;color:var(--ink-soft);letter-spacing:0.04em;margin-bottom:0.5rem;}
+  .kpi .value{font-size:1.35rem;font-weight:600;color:var(--navy);}
+  .kpi .foot{font-size:0.72rem;color:var(--ink-soft);margin-top:0.4rem;}
+  .kpi input.actual-input{
+    width:100%;border:1px solid var(--line);padding:0.35rem 0.5rem;font:inherit;
+    font-size:1.1rem;font-weight:600;border-radius:2px;color:var(--navy);
+  }
+  .kpi input.actual-input:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .kpi.variance{border-top-color:var(--gold);}
+  .kpi.variance .value.over{color:var(--flag);}
+  .kpi.variance .value.under{color:var(--good);}
+
+  @media (max-width:640px){
+    .kpi-row{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="school-header">
+  <div class="school-header-inner">
+    <div class="crest">NCF</div>
+    <div>
+      <div class="school-name">NEW COLLEGE OF FLORIDA</div>
+      <h1>Transfer PHS Award Simulator</h1>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <h2>Award &amp; population grid</h2>
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>GPA band</th>
+          <th class="num">Award</th>
+          <th class="num">Deposited #</th>
+          <th class="num">Enrolled #</th>
+        </tr>
+      </thead>
+      <tbody id="gridBody"></tbody>
+    </table>
+
+    <div class="fallback">
+      <strong>Fewer than 30 completed college credits</strong>
+      <div class="under30-inputs">
+        <div class="field"><label>Deposited count</label><input type="number" id="u30DepCount" value="29"></div>
+        <div class="field"><label>Deposited total $</label><input type="number" id="u30DepTotal" value="157983" step="100"></div>
+        <div class="field"><label>Enrolled count</label><input type="number" id="u30EnrCount" value="24"></div>
+        <div class="field"><label>Enrolled total $</label><input type="number" id="u30EnrTotal" value="131983" step="100"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kpi-block">
+      <h3>Deposited</h3>
+      <div class="kpi-row">
+        <div class="kpi"><div class="label">STUDENTS MODELED</div><div class="value" id="depStudents">0</div><div class="foot">from the grid above</div></div>
+        <div class="kpi"><div class="label">ACTUAL PHS SPEND</div><input type="number" class="actual-input" id="depActual" value="901209" step="100"><div class="foot">edit to compare</div></div>
+        <div class="kpi"><div class="label">PROJECTED SPEND &mdash; MODEL ABOVE</div><div class="value" id="depProjected">$0</div><div class="foot">under the grid above</div></div>
+        <div class="kpi variance"><div class="label">VARIANCE VS. ACTUAL</div><div class="value" id="depVariance">&mdash;</div><div class="foot">projected minus actual</div></div>
+      </div>
+    </div>
+
+    <div class="kpi-block">
+      <h3>Enrolled</h3>
+      <div class="kpi-row">
+        <div class="kpi"><div class="label">STUDENTS MODELED</div><div class="value" id="enrStudents">0</div><div class="foot">from the grid above</div></div>
+        <div class="kpi"><div class="label">ACTUAL PHS SPEND</div><input type="number" class="actual-input" id="enrActual" value="762709" step="100"><div class="foot">edit to compare</div></div>
+        <div class="kpi"><div class="label">PROJECTED SPEND &mdash; MODEL ABOVE</div><div class="value" id="enrProjected">$0</div><div class="foot">under the grid above</div></div>
+        <div class="kpi variance"><div class="label">VARIANCE VS. ACTUAL</div><div class="value" id="enrVariance">&mdash;</div><div class="foot">projected minus actual</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const rows = [
+  { tier:"transformAA", tierLabel:"Transform Partner School AA Degree", band:"hi", bandLabel:"3.50 \u2013 4.00 GPA",  amount:10000, dep:5,  enr:3,  cls:"band-hi" },
+  { tier:"transformAA", tierLabel:"Transform Partner School AA Degree", band:"lo", bandLabel:"3.00 \u2013 3.49 GPA",  amount:7500,  dep:7,  enr:5,  cls:"band-lo" },
+  { tier:"upperMid",    tierLabel:"Upper/Mid-Level Transfer (AA degree, or 30+ credits without AA)", band:"hi", bandLabel:"3.50 \u2013 4.00 GPA", amount:7500, dep:36, enr:30, cls:"band-hi" },
+  { tier:"upperMid",    tierLabel:"Upper/Mid-Level Transfer (AA degree, or 30+ credits without AA)", band:"lo", bandLabel:"3.00 \u2013 3.49 GPA", amount:5000, dep:35, enr:30, cls:"band-lo" },
+  { tier:"upperMid",    tierLabel:"Upper/Mid-Level Transfer (AA degree, or 30+ credits without AA)", band:"b3", bandLabel:"Below 3.00 GPA",    amount:500,  dep:20, enr:18, cls:"band-3" },
+];
+
+function fmt(n){ return "$" + Math.round(Number(n)).toLocaleString("en-US"); }
+
+function renderGrid(){
+  const body = document.getElementById("gridBody");
+  body.innerHTML = "";
+  let lastTier = null;
+  rows.forEach((r, i) => {
+    const tr = document.createElement("tr");
+    tr.className = r.cls;
+    const showTier = r.tier !== lastTier;
+    lastTier = r.tier;
+    tr.innerHTML = `
+      <td class="tiername">${showTier ? r.tierLabel : ""}</td>
+      <td>${r.bandLabel}</td>
+      <td class="num"><span style="color:var(--ink-soft);">$</span><input type="number" data-idx="${i}" data-field="amount" value="${r.amount}" step="100"></td>
+      <td class="num"><input type="number" data-idx="${i}" data-field="dep" value="${r.dep}"></td>
+      <td class="num"><input type="number" data-idx="${i}" data-field="enr" value="${r.enr}"></td>
+    `;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", e => {
+      const idx = Number(e.target.dataset.idx);
+      const field = e.target.dataset.field;
+      rows[idx][field] = Number(e.target.value) || 0;
+      recalc();
+    });
+  });
+}
+
+function recalc(){
+  const u30DepCount = Number(document.getElementById("u30DepCount").value) || 0;
+  const u30DepTotal = Number(document.getElementById("u30DepTotal").value) || 0;
+  const u30EnrCount = Number(document.getElementById("u30EnrCount").value) || 0;
+  const u30EnrTotal = Number(document.getElementById("u30EnrTotal").value) || 0;
+
+  let depStudents = u30DepCount, enrStudents = u30EnrCount;
+  let depProjected = u30DepTotal, enrProjected = u30EnrTotal;
+
+  rows.forEach(r => {
+    depStudents += r.dep;
+    enrStudents += r.enr;
+    depProjected += r.amount * r.dep;
+    enrProjected += r.amount * r.enr;
+  });
+
+  document.getElementById("depStudents").textContent = depStudents.toLocaleString("en-US");
+  document.getElementById("enrStudents").textContent = enrStudents.toLocaleString("en-US");
+  document.getElementById("depProjected").textContent = fmt(depProjected);
+  document.getElementById("enrProjected").textContent = fmt(enrProjected);
+
+  const depActual = Number(document.getElementById("depActual").value) || 0;
+  const enrActual = Number(document.getElementById("enrActual").value) || 0;
+  const depVar = depProjected - depActual;
+  const enrVar = enrProjected - enrActual;
+
+  const depVarEl = document.getElementById("depVariance");
+  depVarEl.textContent = (depVar >= 0 ? "+" : "\u2212") + fmt(Math.abs(depVar));
+  depVarEl.className = "value " + (depVar > 0 ? "over" : depVar < 0 ? "under" : "");
+
+  const enrVarEl = document.getElementById("enrVariance");
+  enrVarEl.textContent = (enrVar >= 0 ? "+" : "\u2212") + fmt(Math.abs(enrVar));
+  enrVarEl.className = "value " + (enrVar > 0 ? "over" : enrVar < 0 ? "under" : "");
+}
+
+["u30DepCount","u30DepTotal","u30EnrCount","u30EnrTotal","depActual","enrActual"].forEach(id => {
+  document.getElementById(id).addEventListener("input", recalc);
+});
+
+renderGrid();
+recalc();
+</script>
+</body>
+</html>
